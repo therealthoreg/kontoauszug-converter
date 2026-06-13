@@ -1,0 +1,24 @@
+{
+  "name": "kontoauszug-converter",
+  "version": "1.0.0",
+  "description": "Konvertiert Kontoauszug-PDFs in CSV-Dateien.",
+  "main": "src/index.js",
+  "bin": {
+    "kontoauszug-converter": "src/index.js"
+  },
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node --test"
+  },
+  "keywords": [
+    "kontoauszug",
+    "pdf",
+    "csv",
+    "banking"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "pdf-parse": "^1.1.1"
+  },
+  "devDependencies": {}
+}
