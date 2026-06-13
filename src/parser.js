@@ -6,6 +6,14 @@ const ING_TRANSACTION_LINE = /^(\d{2}\.\d{2}\.\d{4})(.+?)([+-]?(?:\d{1,3}(?:\.\d
 const AMOUNT_PATTERN = /([+-]?\s*(?:\d{1,3}(?:\.\d{3})*|\d+),\d{2})\s*(?:EUR|€)?\s*([SH])?/gi;
 const BALANCE_WORDS = /\b(anfangssaldo|alter saldo|vortrag|endsaldo|neuer saldo|abschluss|saldo)\b/i;
 const TABLE_HEADER = /Buchung\s*Buchung\s*\/\s*Verwendungszweck\s*Betrag\s*\(EUR\)/i;
+const STATEMENT_FOOTER_PATTERNS = [
+  /\bKunden-Information\b/i,
+  /\bVorliegender Freistellungsauftrag\b/i,
+  /\bBitte\s*beachten\s*Sie/i,
+  /\bRechnungsabschluss\b/i,
+  /\bEinlagensicherung\b/i,
+  /\bInformationsbogen\s+f[uü]r\s+den\s+Einleger\b/i
+];
 
 function normalizeText(text) {
   return text
@@ -83,8 +91,28 @@ function findAmounts(text) {
   return amounts.filter((amount) => amount.value !== null);
 }
 
+function statementFooterIndex(text) {
+  return STATEMENT_FOOTER_PATTERNS.reduce((earliestIndex, pattern) => {
+    const match = text.match(pattern);
+    if (!match || match.index === undefined) {
+      return earliestIndex;
+    }
+
+    return earliestIndex === -1 ? match.index : Math.min(earliestIndex, match.index);
+  }, -1);
+}
+
+function trimStatementFooter(text) {
+  const footerIndex = statementFooterIndex(text);
+  return footerIndex === -1 ? text : text.slice(0, footerIndex);
+}
+
+function isStatementFooterLine(line) {
+  return statementFooterIndex(line) !== -1;
+}
+
 function cleanDescription(description) {
-  return description
+  return trimStatementFooter(description)
     .replace(/\s*(?:EUR|€)\s*/gi, ' ')
     .replace(/^Valuta\s*/i, '')
     .replace(/\s+/g, ' ')
@@ -119,6 +147,14 @@ function buildIngBlocks(lines) {
   let hasSeenTable = false;
 
   for (const line of lines) {
+    if (isStatementFooterLine(line)) {
+      if (current) {
+        blocks.push(current);
+        current = null;
+      }
+      break;
+    }
+
     if (TABLE_HEADER.test(line)) {
       hasSeenTable = true;
       continue;
@@ -192,6 +228,14 @@ function buildBlocks(lines) {
   let current = null;
 
   for (const line of lines) {
+    if (isStatementFooterLine(line)) {
+      if (current) {
+        blocks.push(current);
+        current = null;
+      }
+      break;
+    }
+
     if (isLikelyTransactionStart(line)) {
       if (current) {
         blocks.push(current);
@@ -268,5 +312,6 @@ module.exports = {
   findAmounts,
   normalizeDate,
   normalizeText,
-  parseTransactions
+  parseTransactions,
+  trimStatementFooter
 };

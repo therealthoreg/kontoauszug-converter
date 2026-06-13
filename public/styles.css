@@ -197,6 +197,7 @@ button:disabled {
 
 .results-panel {
   overflow: hidden;
+  margin-top: 32px;
 }
 
 .results-head {

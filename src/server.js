@@ -5,6 +5,7 @@ const http = require('http');
 const path = require('path');
 const { convertPdfBuffer } = require('./converter');
 const { toCsv } = require('./csv');
+const { trimStatementFooter } = require('./parser');
 
 const PORT = Number(process.env.PORT || 3000);
 const MAX_UPLOAD_SIZE = 50 * 1024 * 1024;
@@ -88,7 +89,13 @@ function parseCsvRows(csvText, delimiter = ';') {
 
   const [headers, ...dataRows] = rows;
   return dataRows.map((dataRow) =>
-    Object.fromEntries(headers.map((header, index) => [header, dataRow[index] || '']))
+    Object.fromEntries(headers.map((header, index) => {
+      const value = dataRow[index] || '';
+      return [
+        header,
+        header === 'Buchung / Verwendungszweck' ? trimStatementFooter(value).trim() : value
+      ];
+    }))
   );
 }
 

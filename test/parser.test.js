@@ -67,6 +67,32 @@ test('parses ING statement layout and ignores preamble', () => {
   ]);
 });
 
+test('ignores ING footer information after the last transaction', () => {
+  const text = `
+    Girokonto Nummer 5427799233
+    Kontoauszug Januar 2025
+    BuchungBuchung / VerwendungszweckBetrag (EUR)
+    Valuta
+    31.01.2025UeberweisungKleingeld Plus - Sparen-0,01
+    31.01.2025
+    Kunden-Information
+    Vorliegender Freistellungsauftrag1.000,00
+    Rechnungsabschluss Kontoübersicht
+    Einlagensicherung
+  `;
+
+  const rows = parseTransactions(text);
+
+  assert.deepEqual(rows, [
+    {
+      Buchung: '31.01.2025',
+      Valuta: '31.01.2025',
+      'Buchung / Verwendungszweck': 'UeberweisungKleingeld Plus - Sparen',
+      'Betrag (EUR)': '-0.01'
+    }
+  ]);
+});
+
 test('escapes csv cells', () => {
   const csv = toCsv(
     [

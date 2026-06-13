@@ -41,7 +41,7 @@ test('sanitizes upload file names for output files', () => {
 test('parses semicolon csv with escaped values', () => {
   const rows = parseCsvRows([
     'Buchung;Valuta;Buchung / Verwendungszweck;Betrag (EUR)',
-    '2026-04-03;2026-04-03;"Text mit ; und ""Quote""";-42.19'
+    '2026-04-03;2026-04-03;"Text mit ; und ""Quote"" Kunden-Information Rechnungsabschluss";-42.19'
   ].join('\n'));
 
   assert.deepEqual(rows, [
