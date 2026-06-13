@@ -5,8 +5,6 @@ const fileInput = document.querySelector('#pdfs');
 const fileLabel = document.querySelector('#file-label');
 const yearInput = document.querySelector('#year');
 const submitButton = document.querySelector('#submit-button');
-const statusEl = document.querySelector('#status');
-const fileResultsEl = document.querySelector('#file-results');
 const searchInput = document.querySelector('#search');
 const matchCountEl = document.querySelector('#match-count');
 const amountSumEl = document.querySelector('#amount-sum');
@@ -28,9 +26,11 @@ function formatAmount(value) {
   return amountFormatter.format(parseAmount(value));
 }
 
-function setStatus(message, isError = false) {
-  statusEl.textContent = message;
-  statusEl.classList.toggle('is-error', isError);
+function renderMessage(message, isError = false) {
+  matchCountEl.textContent = '0';
+  amountSumEl.textContent = amountFormatter.format(0);
+  rowsEl.innerHTML = `<tr><td colspan="5" class="empty-cell${isError ? ' is-error' : ''}"></td></tr>`;
+  rowsEl.querySelector('td').textContent = message;
 }
 
 function rowMatches(row, token) {
@@ -85,23 +85,7 @@ function renderRows() {
   );
 }
 
-function renderFileResults(files) {
-  fileResultsEl.replaceChildren(
-    ...files.map((file) => {
-      const pill = document.createElement('div');
-      pill.className = `file-pill${file.error ? ' is-error' : ''}`;
-      pill.title = file.error || file.outputFile || file.fileName;
-      pill.textContent = file.error
-        ? `${file.fileName}: ${file.error}`
-        : `${file.fileName}: ${file.rowCount} Zeilen`;
-      return pill;
-    })
-  );
-}
-
-async function loadOutputRows(successMessage) {
-  setStatus('Lade vorhandene CSV-Dateien ...');
-
+async function loadOutputRows() {
   try {
     const response = await fetch('/api/rows');
     const payload = await response.json();
@@ -112,17 +96,9 @@ async function loadOutputRows(successMessage) {
 
     rows = payload.rows || [];
     renderRows();
-    renderFileResults(payload.files || []);
-
-    if (successMessage) {
-      setStatus(successMessage);
-    } else if (rows.length > 0) {
-      setStatus(`${rows.length} Buchungen aus output geladen.`);
-    } else {
-      setStatus('Keine CSV-Dateien in output gefunden.');
-    }
   } catch (error) {
-    setStatus(error.message, true);
+    rows = [];
+    renderMessage(error.message, true);
   }
 }
 
@@ -145,7 +121,8 @@ form.addEventListener('submit', async (event) => {
 
   const files = [...fileInput.files];
   if (files.length === 0) {
-    setStatus('Bitte mindestens eine PDF-Datei auswaehlen.', true);
+    rows = [];
+    renderMessage('Bitte mindestens eine PDF-Datei auswaehlen.', true);
     return;
   }
 
@@ -156,8 +133,8 @@ form.addEventListener('submit', async (event) => {
   formData.append('year', yearInput.value.trim());
 
   submitButton.disabled = true;
-  setStatus('Konvertiere PDF-Dateien ...');
-  fileResultsEl.replaceChildren();
+  rows = [];
+  renderMessage('Konvertiere PDF-Dateien ...');
 
   try {
     const response = await fetch('/api/convert', {
@@ -167,15 +144,16 @@ form.addEventListener('submit', async (event) => {
     const payload = await response.json();
 
     if (!response.ok) {
-      renderFileResults(payload.files || []);
-      setStatus(payload.error || 'Konvertierung fehlgeschlagen.', true);
+      rows = [];
+      renderMessage(payload.error || 'Konvertierung fehlgeschlagen.', true);
       return;
     }
 
     searchInput.value = '';
-    await loadOutputRows(`${payload.rows.length} neue Buchungen konvertiert. output wurde neu geladen.`);
+    await loadOutputRows();
   } catch (error) {
-    setStatus(error.message, true);
+    rows = [];
+    renderMessage(error.message, true);
   } finally {
     submitButton.disabled = false;
   }

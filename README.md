@@ -20,6 +20,12 @@ Danach die App im Browser oeffnen:
 http://localhost:3000
 ```
 
+Optional kann ein anderer Port gesetzt werden:
+
+```bash
+PORT=4000 npm start
+```
+
 ## Nutzung
 
 1. Eine oder mehrere PDF-Dateien auswaehlen.
@@ -33,15 +39,11 @@ Wenn der Ordner `output` bereits CSV-Dateien enthaelt, werden diese beim Oeffnen
 
 Die Suche filtert die sichtbaren Ergebniszeilen ueber alle Spalten. Zur aktuellen Filterung werden Trefferanzahl und Summe der Euro-Betraege angezeigt.
 
-## Optionale CLI
-
-Die bisherige Kommandozeile ist noch als Hilfsweg vorhanden:
+## Tests
 
 ```bash
-npm run cli -- ./kontoauszug.pdf
+npm test
 ```
-
-Auch dabei landen die CSV-Dateien im Ordner `output`.
 
 ## Hinweis
 
@@ -52,4 +54,4 @@ Kontoauszugs-PDFs unterscheiden sich je nach Bank stark. Der Parser nutzt eine r
 - Deutsche Betraege wie `1.234,56`, `-12,34`, `12,34 S` und `12,34 H` werden normalisiert.
 - Mehrzeilige Buchungstexte werden zusammengefuehrt.
 
-Wenn deine Bank ein spezielles Layout nutzt, ist die wichtigste Stelle [src/parser.js](/Users/thoregersen/Desktop/kontoauszug-converter/src/parser.js).
+Wenn deine Bank ein spezielles Layout nutzt, ist die wichtigste Stelle [src/parser.js](src/parser.js).

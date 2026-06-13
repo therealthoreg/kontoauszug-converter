@@ -151,50 +151,6 @@ button:disabled {
   opacity: 0.7;
 }
 
-.status-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(280px, max-content);
-  gap: 16px;
-  align-items: start;
-  min-height: 56px;
-  padding: 14px 2px;
-}
-
-.status {
-  color: var(--muted);
-  font-size: 14px;
-}
-
-.status.is-error {
-  color: var(--danger);
-  font-weight: 700;
-}
-
-.file-results {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 8px;
-}
-
-.file-pill {
-  max-width: 360px;
-  padding: 6px 10px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--panel);
-  color: var(--muted);
-  font-size: 12px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.file-pill.is-error {
-  border-color: #f3b8b1;
-  color: var(--danger);
-}
-
 .results-panel {
   overflow: hidden;
   margin-top: 32px;
@@ -289,6 +245,11 @@ td {
   vertical-align: middle;
 }
 
+.empty-cell.is-error {
+  color: var(--danger);
+  font-weight: 700;
+}
+
 @media (max-width: 820px) {
   .app-shell {
     width: min(100% - 20px, 1180px);
@@ -297,13 +258,8 @@ td {
 
   .toolbar,
   .upload-form,
-  .status-row,
   .results-head {
     grid-template-columns: 1fr;
-  }
-
-  .file-results {
-    justify-content: flex-start;
   }
 
   .metrics {

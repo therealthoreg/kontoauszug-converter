@@ -3,12 +3,8 @@
   "version": "1.0.0",
   "description": "Konvertiert Kontoauszug-PDFs in CSV-Dateien.",
   "main": "src/server.js",
-  "bin": {
-    "kontoauszug-converter": "src/index.js"
-  },
   "scripts": {
     "start": "node src/server.js",
-    "cli": "node src/index.js",
     "test": "node --test"
   },
   "keywords": [
