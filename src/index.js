@@ -7,14 +7,16 @@ const pdf = require('pdf-parse');
 const { toCsv } = require('./csv');
 const { normalizeText, parseTransactions } = require('./parser');
 
+const OUTPUT_DIR = 'output';
+
 function printHelp() {
   console.log(`
 Usage:
   kontoauszug-converter <input.pdf|ordner...> [options]
 
 Options:
-  -o, --output <path>       Zielpfad der CSV-Datei oder Zielordner bei mehreren PDFs
-  --merge-output <file>     Alle erkannten Buchungen in eine CSV schreiben
+  -o, --output <path>       Dateiname oder Unterordner innerhalb von output
+  --merge-output <file>     Alle erkannten Buchungen in eine CSV innerhalb von output schreiben
   --recursive               PDFs in Ordnern rekursiv suchen
   --year <year>             Jahr fuer Datumsangaben ohne Jahr, z.B. 2026
   --delimiter <char>        CSV-Trennzeichen, Standard: ;
@@ -62,18 +64,52 @@ function parseArgs(argv) {
   return args;
 }
 
-function defaultOutputPath(inputPath) {
-  const parsed = path.parse(inputPath);
-  return path.join(parsed.dir, `${parsed.name}.csv`);
+function outputRoot() {
+  return path.resolve(OUTPUT_DIR);
+}
+
+function relativeOutputPath(outputPath) {
+  if (!outputPath) {
+    return '';
+  }
+
+  let rootlessPath = outputPath;
+  if (path.isAbsolute(outputPath)) {
+    const cwdRelativePath = path.relative(process.cwd(), outputPath);
+    rootlessPath = cwdRelativePath && !cwdRelativePath.startsWith('..') && !path.isAbsolute(cwdRelativePath)
+      ? cwdRelativePath
+      : path.basename(outputPath);
+  }
+
+  const segments = path.normalize(rootlessPath)
+    .split(path.sep)
+    .filter((segment) => segment && segment !== '.' && segment !== '..');
+
+  if (segments[0] === OUTPUT_DIR) {
+    segments.shift();
+  }
+
+  return path.join(...segments);
+}
+
+function pathInOutput(outputPath) {
+  const relativePath = relativeOutputPath(outputPath);
+  return relativePath ? path.join(outputRoot(), relativePath) : outputRoot();
 }
 
 function outputPathForInput(inputPath, args) {
-  if (args.inputs.length === 1 && !args.outputIsDirectory) {
-    return path.resolve(args.output || defaultOutputPath(inputPath));
+  const parsed = path.parse(inputPath);
+  const outputPath = args.output ? pathInOutput(args.output) : null;
+
+  if (args.inputs.length === 1 && !args.outputIsDirectory && outputPath) {
+    if (path.extname(outputPath).toLowerCase() === '.csv') {
+      return outputPath;
+    }
+
+    return path.join(outputPath, `${parsed.name}.csv`);
   }
 
-  const parsed = path.parse(inputPath);
-  const outputDir = path.resolve(args.output || parsed.dir);
+  const outputDir = outputPath || outputRoot();
   return path.join(outputDir, `${parsed.name}.csv`);
 }
 
@@ -228,7 +264,7 @@ async function main() {
         ...row
       }))
     );
-    const mergeOutputPath = path.resolve(args.mergeOutput);
+    const mergeOutputPath = pathInOutput(args.mergeOutput);
 
     await fs.mkdir(path.dirname(mergeOutputPath), { recursive: true });
     await fs.writeFile(

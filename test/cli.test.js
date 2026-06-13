@@ -18,14 +18,28 @@ test('uses output option as directory for multiple inputs', () => {
   const args = parseArgs(['januar.pdf', 'februar.pdf', '-o', 'export']);
   const outputPath = outputPathForInput(path.resolve('januar.pdf'), args);
 
-  assert.equal(outputPath, path.resolve('export', 'januar.csv'));
+  assert.equal(outputPath, path.resolve('output', 'export', 'januar.csv'));
 });
 
-test('keeps output option as file for one input', () => {
+test('writes default output to output directory', () => {
+  const args = parseArgs(['januar.pdf']);
+  const outputPath = outputPathForInput(path.resolve('januar.pdf'), args);
+
+  assert.equal(outputPath, path.resolve('output', 'januar.csv'));
+});
+
+test('keeps output option as file inside output directory for one input', () => {
   const args = parseArgs(['januar.pdf', '-o', 'konto.csv']);
   const outputPath = outputPathForInput(path.resolve('januar.pdf'), args);
 
-  assert.equal(outputPath, path.resolve('konto.csv'));
+  assert.equal(outputPath, path.resolve('output', 'konto.csv'));
+});
+
+test('keeps absolute output option inside output directory', () => {
+  const args = parseArgs(['januar.pdf', '-o', path.resolve('exports', 'konto.csv')]);
+  const outputPath = outputPathForInput(path.resolve('januar.pdf'), args);
+
+  assert.equal(outputPath, path.resolve('output', 'exports', 'konto.csv'));
 });
 
 test('resolves pdf files from a directory', async () => {
@@ -68,5 +82,5 @@ test('uses output option as directory for directory input even with one pdf', ()
   };
   const outputPath = outputPathForInput(path.resolve('kontoauszuege', 'januar.pdf'), args);
 
-  assert.equal(outputPath, path.resolve('export', 'januar.csv'));
+  assert.equal(outputPath, path.resolve('output', 'export', 'januar.csv'));
 });

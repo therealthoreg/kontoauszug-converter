@@ -1,6 +1,6 @@
 # Kontoauszug Converter
 
-Kleines Node.js-CLI, das Kontoauszug-PDFs ausliest und Buchungen als CSV speichert.
+Kleine lokale Web-App, die Kontoauszug-PDFs ausliest, Buchungen als CSV speichert und die erkannten Zeilen durchsuchbar macht.
 
 ## Installation
 
@@ -8,83 +8,48 @@ Kleines Node.js-CLI, das Kontoauszug-PDFs ausliest und Buchungen als CSV speiche
 npm install
 ```
 
-## Nutzung
+## Start
 
 ```bash
-npm start -- ./kontoauszug.pdf -o ./kontoauszug.csv
+npm start
 ```
 
-Du kannst auch nur einen Ordner angeben. Dann werden alle PDFs direkt in diesem Ordner konvertiert:
-
-```bash
-npm start -- ./kontoauszuege
-```
-
-Die CSV-Dateien werden mit gleichem Namen neben den PDFs erzeugt, z.B. `januar.pdf` zu `januar.csv`.
-Mit `-o` kannst du einen Zielordner angeben:
-
-```bash
-npm start -- ./kontoauszuege -o ./csv-export
-```
-
-PDFs in Unterordnern findest du mit:
-
-```bash
-npm start -- ./kontoauszuege --recursive -o ./csv-export
-```
-
-Mehrere PDFs kannst du in einem Durchlauf konvertieren:
-
-```bash
-npm start -- ./januar.pdf ./februar.pdf ./maerz.pdf
-```
-
-Dabei wird fuer jede PDF eine CSV mit gleichem Namen erzeugt, also z.B. `januar.csv`.
-Mit `-o` kannst du bei mehreren PDFs einen Zielordner angeben:
-
-```bash
-npm start -- ./januar.pdf ./februar.pdf -o ./csv-export
-```
-
-Wenn du alle Buchungen zusaetzlich in einer gemeinsamen CSV haben willst:
-
-```bash
-npm start -- ./kontoauszuege --merge-output ./alle-buchungen.csv
-```
-
-Optional kannst du ein Jahr angeben, falls der Kontoauszug nur Datumswerte wie `03.04.` enthält:
-
-```bash
-npm start -- ./kontoauszug.pdf -o ./kontoauszug.csv --year 2026
-```
-
-Weitere Optionen:
-
-```bash
-node src/index.js ./kontoauszug.pdf --delimiter "," --debug-text ./auszug.txt
-```
-
-Bei mehreren PDFs wird `--debug-text` als Zielordner behandelt:
-
-```bash
-node src/index.js ./januar.pdf ./februar.pdf --debug-text ./debug-text
-```
-
-Die CSV-Spalten sind:
+Danach die App im Browser oeffnen:
 
 ```text
-Buchung,Valuta,Buchung / Verwendungszweck,Betrag (EUR)
+http://localhost:3000
 ```
 
-Bei `--merge-output` kommt vorne die Spalte `source_file` hinzu.
+## Nutzung
+
+1. Eine oder mehrere PDF-Dateien auswaehlen.
+2. Optional ein Jahr angeben, falls der Kontoauszug nur Datumswerte wie `03.04.` enthaelt.
+3. `Konvertieren` starten.
+4. Die erkannten Buchungen in der Tabelle durchsuchen.
+
+Die CSV-Dateien werden immer im Ordner `output` abgelegt, z.B. `januar.pdf` zu `output/januar.csv`.
+
+Wenn der Ordner `output` bereits CSV-Dateien enthaelt, werden diese beim Oeffnen der App automatisch in die Tabelle geladen.
+
+Die Suche filtert die sichtbaren Ergebniszeilen ueber alle Spalten. Zur aktuellen Filterung werden Trefferanzahl und Summe der Euro-Betraege angezeigt.
+
+## Optionale CLI
+
+Die bisherige Kommandozeile ist noch als Hilfsweg vorhanden:
+
+```bash
+npm run cli -- ./kontoauszug.pdf
+```
+
+Auch dabei landen die CSV-Dateien im Ordner `output`.
 
 ## Hinweis
 
-Kontoauszugs-PDFs unterscheiden sich je nach Bank stark. Der Parser nutzt eine robuste Heuristik für deutsche Auszüge:
+Kontoauszugs-PDFs unterscheiden sich je nach Bank stark. Der Parser nutzt eine robuste Heuristik fuer deutsche Auszuege:
 
 - Buchungen beginnen mit einem Datum im Format `TT.MM.` oder `TT.MM.JJJJ`.
 - Optional wird ein zweites Datum als Wertstellung erkannt.
-- Deutsche Beträge wie `1.234,56`, `-12,34`, `12,34 S` und `12,34 H` werden normalisiert.
-- Mehrzeilige Buchungstexte werden zusammengeführt.
+- Deutsche Betraege wie `1.234,56`, `-12,34`, `12,34 S` und `12,34 H` werden normalisiert.
+- Mehrzeilige Buchungstexte werden zusammengefuehrt.
 
 Wenn deine Bank ein spezielles Layout nutzt, ist die wichtigste Stelle [src/parser.js](/Users/thoregersen/Desktop/kontoauszug-converter/src/parser.js).

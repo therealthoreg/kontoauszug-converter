@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Kontoauszug Converter</title>
+    <link rel="stylesheet" href="/styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="toolbar" aria-label="PDF-Konvertierung">
+        <div>
+          <p class="eyebrow">Kontoauszug Converter</p>
+          <h1>PDFs konvertieren</h1>
+        </div>
+        <form id="upload-form" class="upload-form">
+          <label class="file-picker">
+            <span id="file-label">PDF-Dateien auswaehlen</span>
+            <input id="pdfs" name="pdfs" type="file" accept="application/pdf,.pdf" multiple required>
+          </label>
+          <label class="year-field">
+            <span>Jahr</span>
+            <input id="year" name="year" type="text" inputmode="numeric" maxlength="4" placeholder="2026">
+          </label>
+          <button id="submit-button" type="submit">Konvertieren</button>
+        </form>
+      </section>
+
+      <section class="status-row" aria-live="polite">
+        <div id="status" class="status">Bereit</div>
+        <div id="file-results" class="file-results"></div>
+      </section>
+
+      <section class="results-panel">
+        <div class="results-head">
+          <label class="search-field">
+            <span>Suche</span>
+            <input id="search" type="search" placeholder="Token eingeben" autocomplete="off">
+          </label>
+          <div class="metrics" aria-label="Gefilterte Ergebnisse">
+            <div>
+              <span class="metric-label">Treffer</span>
+              <strong id="match-count">0</strong>
+            </div>
+            <div>
+              <span class="metric-label">Summe</span>
+              <strong id="amount-sum">0,00 EUR</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Datei</th>
+                <th>Buchung</th>
+                <th>Valuta</th>
+                <th>Verwendungszweck</th>
+                <th class="amount-cell">Betrag</th>
+              </tr>
+            </thead>
+            <tbody id="rows">
+              <tr>
+                <td colspan="5" class="empty-cell">Noch keine Daten geladen.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
